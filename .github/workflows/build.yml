@@ -1,0 +1,10 @@
+name: Build RMK firmware
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "**"
+
+jobs:
+  build:
+    uses: haobogu/rmk-project-template/.github/workflows/user_build.yml@master
