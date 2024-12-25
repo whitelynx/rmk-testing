@@ -54,6 +54,8 @@ jobs:
         if: ${{ matrix.chip == 'esp32c3' }}
         working-directory: ./${{ matrix.chip }}
         run: |
+          pwd
+          ls
           PROJECT_NAME=$(rmkit get-project-name --keyboard-toml-path $(pwd)/keyboard.toml)
           cd rmk
           espflash save-image --chip ${{ matrix.chip }} "target/${{ steps.arch.outputs.arch }}/release/$PROJECT_NAME" "./${{ matrix.chip }}/rmk/$PROJECT_NAME.bin"
