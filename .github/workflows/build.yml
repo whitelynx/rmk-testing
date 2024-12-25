@@ -54,6 +54,7 @@ jobs:
         if: ${{ matrix.chip == 'esp32c3' }}
         working-directory: ./${{ matrix.chip }}
         run: |
+          set -x
           pwd
           ls
           PROJECT_NAME=$(rmkit get-project-name --keyboard-toml-path $(pwd)/keyboard.toml)
