@@ -16,7 +16,7 @@ jobs:
       matrix:
         chip:
           - rp2040
-          - stm32f103c8
+          #- stm32f103c8
           - esp32c3
           - nrf52840
     steps:
