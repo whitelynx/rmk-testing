@@ -31,7 +31,7 @@ jobs:
       - name: Create firmware project
         working-directory: .
         run: rmkit create --keyboard-toml-path ${{ matrix.chip }}/keyboard.toml --vial-json-path vial.json --target-dir ${{ matrix.chip }}/rmk
-      - name: Build hex firmware
+      - name: Build firmware
         working-directory: ./${{ matrix.chip }}/rmk
         run: cargo ${{ matrix.chip == 'esp32c3' && '+esp' || '' }} build --release
       - name: Build UF2 image
@@ -54,16 +54,10 @@ jobs:
         if: ${{ matrix.chip == 'esp32c3' }}
         working-directory: ./${{ matrix.chip }}/rmk
         run: |
-          set -x
-          pwd
-          ls
-          ls "target"
-          ls "target/${{ steps.arch.outputs.arch }}"
-          ls "target/${{ steps.arch.outputs.arch }}/release"
-          ls "target/${{ steps.arch.outputs.arch }}/release/$PROJECT_NAME"
           PROJECT_NAME=$(rmkit get-project-name --keyboard-toml-path ../keyboard.toml)
           espflash save-image --chip ${{ matrix.chip }} "target/${{ steps.arch.outputs.arch }}/release/$PROJECT_NAME" "./$PROJECT_NAME.bin"
       - name: Upload hex artifacts
+        if: ${{ matrix.chip != 'esp32c3' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.chip }}_firmware_hex
