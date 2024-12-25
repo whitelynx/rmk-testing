@@ -9,8 +9,8 @@ chip = "esp32c3"
 
 [matrix]
 # Input and output pins are mandatory
-input_pins = ["GPIO6", "GPIO7", "GPIO8"]
-output_pins = ["GPIO9", "GPIO10", "GPIO20"]
+input_pins = ["gpio6", "gpio7", "gpio8"]
+output_pins = ["gpio9", "gpio10", "gpio20"]
 # WARNING: Currently row2col/col2row is set in RMK's feature gate, configs here do nothing actually
 # row2col = true
 
@@ -38,7 +38,7 @@ keymap = [
 # scrolllock.pin = "PA3"
 # scrolllock.low_active = true
 # Just ignore if no light pin is used for it
-numslock.pin = "GPIO21"
+numslock.pin = "gpio21"
 numslock.low_active = true
 
 
