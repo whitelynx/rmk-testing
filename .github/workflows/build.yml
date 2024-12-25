@@ -1,10 +1,69 @@
 name: Build RMK firmware
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - "**"
 
 jobs:
   build:
-    uses: whitelynx/rmk-testing/.github/workflows/user_build.yml@master
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chip:
+          - rp2040
+          #- stm32f103c8
+          - esp32c3
+          - nrf52840
+    steps:
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Install cargo dependencies
+        run: cargo binstall flip-link ${{ matrix.chip == 'esp32c3' && 'espflash' || 'cargo-make' }} rmkit -y
+      - uses: actions/checkout@v3
+      - name: Install libssl
+        run: wget http://nz2.archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb && sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+      - name: Prepare esp environment
+        if: ${{ matrix.chip == 'esp32c3' }}
+        run: |
+          cargo binstall ldproxy espup -y
+          espup install
+      - name: Create firmware project
+        working-directory: .
+        run: rmkit create --keyboard-toml-path ${{ matrix.chip }}/keyboard.toml --vial-json-path vial.json --target-dir ${{ matrix.chip }}/rmk
+      - name: Build hex firmware
+        working-directory: ./${{ matrix.chip }}/rmk
+        run: cargo ${{ matrix.chip == 'esp32c3' && '+esp' }} build --release
+      - name: Build UF2 image
+        if: ${{ matrix.chip != 'esp32c3' }}
+        working-directory: ./${{ matrix.chip }}/rmk
+        run: cargo make uf2 --release
+      - name: Get target arch
+        id: arch
+        if: ${{ matrix.chip != 'esp32c3' }}
+        run: |
+          case "${{ matrix.chip }}" in
+            esp32c3) ARCH="riscv32imc-esp-espidf" ;;
+            esp32s3) ARCH="riscv32imac-esp-espidf" ;;
+            esp32c6) ARCH="xtensa-esp32s3-espidf" ;;
+            *) ARCH="" ;;
+          esac
+          # Save the arch as a GitHub Actions output variable
+          echo "arch=$ARCH" >> $GITHUB_OUTPUT
+      - name: Build bin image
+        if: ${{ matrix.chip == 'esp32c3' }}
+        working-directory: ./${{ matrix.chip }}/rmk
+        run: |
+          PROJECT_NAME=`rmkit get-project-name --keyboard-toml-path ${{ matrix.chip }}/keyboard.toml`
+          espflash save-image --chip ${{ matrix.chip }} "target/${{ steps.arch.outputs.arch }}/release/$PROJECT_NAME" "./${{ matrix.chip }}/rmk/$PROJECT_NAME.bin"
+      - name: Upload hex artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.chip }}_firmware_hex
+          path: ${{ matrix.chip }}/rmk/*.hex
+      - name: Upload UF2 artifacts
+        if: ${{ matrix.chip != 'esp32c3' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.chip }}_firmware_uf2
+          path: ${{ matrix.chip }}/rmk/*.uf2
+      - name: Upload bin artifacts
+        if: ${{ matrix.chip == 'esp32c3' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.chip }}_firmware_bin
+          path: ${{ matrix.chip }}/rmk/*.bin
