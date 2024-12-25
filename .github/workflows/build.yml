@@ -7,4 +7,4 @@ on:
 
 jobs:
   build:
-    uses: haobogu/rmk-project-template/.github/workflows/user_build.yml@master
+    uses: whitelynx/rmk-testing/.github/workflows/user_build.yml@master
