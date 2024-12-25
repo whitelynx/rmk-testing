@@ -33,7 +33,7 @@ jobs:
         run: rmkit create --keyboard-toml-path ${{ matrix.chip }}/keyboard.toml --vial-json-path vial.json --target-dir ${{ matrix.chip }}/rmk
       - name: Build hex firmware
         working-directory: ./${{ matrix.chip }}/rmk
-        run: cargo ${{ matrix.chip == 'esp32c3' && '+esp' }} build --release
+        run: cargo ${{ matrix.chip == 'esp32c3' && '+esp' || '' }} build --release
       - name: Build UF2 image
         if: ${{ matrix.chip != 'esp32c3' }}
         working-directory: ./${{ matrix.chip }}/rmk
