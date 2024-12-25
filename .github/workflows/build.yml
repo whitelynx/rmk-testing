@@ -40,7 +40,7 @@ jobs:
         run: cargo make uf2 --release
       - name: Get target arch
         id: arch
-        if: ${{ matrix.chip != 'esp32c3' }}
+        if: ${{ matrix.chip == 'esp32c3' }}
         run: |
           case "${{ matrix.chip }}" in
             esp32c3) ARCH="riscv32imc-esp-espidf" ;;
