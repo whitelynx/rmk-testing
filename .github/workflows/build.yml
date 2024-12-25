@@ -52,14 +52,17 @@ jobs:
           echo "arch=$ARCH" >> $GITHUB_OUTPUT
       - name: Build bin image
         if: ${{ matrix.chip == 'esp32c3' }}
-        working-directory: ./${{ matrix.chip }}
+        working-directory: ./${{ matrix.chip }}/rmk
         run: |
           set -x
           pwd
           ls
-          PROJECT_NAME=$(rmkit get-project-name --keyboard-toml-path $(pwd)/keyboard.toml)
-          cd rmk
-          espflash save-image --chip ${{ matrix.chip }} "target/${{ steps.arch.outputs.arch }}/release/$PROJECT_NAME" "./${{ matrix.chip }}/rmk/$PROJECT_NAME.bin"
+          ls "target"
+          ls "target/${{ steps.arch.outputs.arch }}"
+          ls "target/${{ steps.arch.outputs.arch }}/release"
+          ls "target/${{ steps.arch.outputs.arch }}/release/$PROJECT_NAME"
+          PROJECT_NAME=$(rmkit get-project-name --keyboard-toml-path ../keyboard.toml)
+          espflash save-image --chip ${{ matrix.chip }} "target/${{ steps.arch.outputs.arch }}/release/$PROJECT_NAME" "./$PROJECT_NAME.bin"
       - name: Upload hex artifacts
         uses: actions/upload-artifact@v4
         with:
