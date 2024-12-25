@@ -39,11 +39,11 @@ jobs:
       - name: Upload hex artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: firmware_hex
+          name: ${{ matrix.chip }}_firmware_hex
           path: ${{ matrix.chip }}/rmk/*.hex
       - name: Upload UF2 artifacts
         if: ${{ matrix.chip != 'esp32c3' }}
         uses: actions/upload-artifact@v4
         with:
-          name: firmware_uf2
+          name: ${{ matrix.chip }}_firmware_uf2
           path: ${{ matrix.chip }}/rmk/*.uf2
